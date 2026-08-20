@@ -2,6 +2,7 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kereskedelem és marketing – mintatanterv folyamatábra</title>
 <style>
   :root{
@@ -150,7 +151,7 @@
   .card.dim{opacity:0.28;}
   .card.hi{box-shadow:0 3px 10px rgba(20,25,40,0.14); transform:translateY(-1px);}
 
-  svg.connectors{position:absolute; top:0; left:0; pointer-events:none; overflow:visible;}
+  svg.connectors{position:absolute; top:0; left:0; z-index:2; pointer-events:none; overflow:visible;}
   svg.connectors path{
     fill:none;
     stroke-width:2;
@@ -167,6 +168,41 @@
     font-size:11px;
     color:var(--sub);
   }
+
+  .mobile-view{display:none;}
+  .mv-select{
+    width:100%; font-size:16px; padding:10px 12px; margin:4px 0 16px;
+    border-radius:9px; border:1px solid var(--line); background:var(--paper);
+    color:var(--ink); font-weight:600;
+  }
+  .mv-summary{font-size:12px; color:var(--sub); margin:-10px 0 14px;}
+  .mv-cards{display:flex; flex-direction:column; gap:12px;}
+  .mv-section-title{
+    font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--sub); font-weight:700; margin:24px 0 10px;
+  }
+  .prereq-line{
+    margin-top:7px; font-size:11px; color:var(--c-komm);
+    background:#f4edff; border-radius:6px; padding:4px 8px;
+    display:inline-flex; align-items:center; gap:4px; cursor:pointer;
+  }
+  .prereq-line:active{opacity:.65;}
+  .prereq-line .pl-sub{opacity:.65;}
+  .mcard.prereq-card{background:#fbfaff; cursor:pointer;}
+  .prereq-tag{
+    display:block; font-size:9.5px; text-transform:uppercase; letter-spacing:.03em;
+    color:var(--c-komm); font-weight:700; margin-bottom:4px;
+  }
+
+  @media (max-width: 720px){
+    .page{padding:16px 14px 40px;}
+    header h1{font-size:17px;}
+    header p{font-size:12px;}
+    .legend{font-size:11px; gap:10px 14px; padding:10px 12px;}
+    .legend .lines-legend{display:none;}
+    .board{display:none;}
+    .mobile-view{display:block;}
+  }
 </style>
 </head>
 <body>
@@ -177,12 +213,12 @@
   </header>
 
   <div class="legend">
-    <div class="grp"><b>Értékelés:</b>
+    <div class="grp eval-legend"><b>Értékelés:</b>
       <span class="swatch"><span class="badge badge-v">v</span> vizsga</span>
       <span class="swatch"><span class="badge badge-gyj">gyj</span> gyak. jegy</span>
       <span class="swatch"><span class="badge badge-ai">ai</span> aláírás</span>
     </div>
-    <div class="grp"><b>Előfeltétel-láncok:</b>
+    <div class="grp lines-legend"><b>Előfeltétel-láncok:</b>
       <span class="swatch"><span class="ln" style="border-color:#2563eb"></span> matematika / statisztika</span>
       <span class="swatch"><span class="ln" style="border-color:#059669"></span> pénzügy / számvitel</span>
       <span class="swatch"><span class="ln" style="border-color:#d97706"></span> jog</span>
@@ -198,13 +234,20 @@
     <div class="columns" id="columns"></div>
   </div>
 
-  <footer>Kártya fölé húzva kiemelődnek a kapcsolódó előfeltétel-vonalak és tárgyak. A halványsárga jelzés kreditkövetelményt jelöl, nem konkrét tárgyi előfeltételt.</footer>
+  <div class="mobile-view" id="mobileView">
+    <select class="mv-select" id="felevSelect"></select>
+    <div class="mv-summary" id="mvSummary"></div>
+    <div class="mv-cards" id="mvCards"></div>
+    <div id="mvPrereqs"></div>
+  </div>
+
+  <footer>Asztali nézetben egy tárgyra kattintva (vagy fölé húzva) kiemelődnek a kapcsolódó előfeltétel-vonalak. Mobil nézetben a legördülőből válaszd ki a félévet – az előfeltétel tárgyak külön szakaszban jelennek meg. A halványsárga jelzés kreditkövetelményt jelöl, nem konkrét tárgyi előfeltételt.</footer>
 </div>
 
 <script>
 const DATA = [
   { label:"1. félév", sum:"30 kredit · EA 10/hét · GY 14/hét", subjects:[
-    {id:"f1-mat1", n:"Gazdasági matematika 1.", ev:"v", kr:5, ea:2, gy:2},
+    {id:"f1-mat1", n:"Gazdasági matematika 1.", ev:"gyj", kr:5, ea:2, gy:2},
     {id:"f1-kozgaz1", n:"Közgazdaságtan 1.", ev:"v", kr:5, ea:1, gy:2},
     {id:"f1-menedzs1", n:"Menedzsment alapismeretek 1.", ev:"gyj", kr:3, ea:1, gy:1},
     {id:"f1-vallgazd", n:"Vállalatgazdaságtan", ev:"v", kr:5, ea:1, gy:2},
@@ -268,7 +311,7 @@ const DATA = [
     {id:"f6-szab5", n:"Szabadon választható tárgy", ev:"gyj", kr:2, ea:0, gy:2, elective:true},
   ]},
   { label:"7. félév", sum:"30 kredit · EA 0/hét · GY 48/hét", subjects:[
-    {id:"f7-kp2", n:"Kompetencia-Portfólió 2.", ev:"ai", kr:0, ea:0, gy:2, note:"+150 kredit"},
+    {id:"f7-kp2", n:"Kompetencia-Portfólió 2.", ev:"ai", kr:0, ea:0, gy:2, note:"min. 150 kredit"},
     {id:"f7-szd2", n:"Szakdolgozat-készítés 2.", ev:"ai", kr:5, ea:0, gy:6},
     {id:"f7-szakgyak", n:"Szakmai gyakorlat (13 hét)", ev:"ai", kr:25, ea:0, gy:40, note:"min. 120 kredit"},
   ]},
@@ -328,6 +371,8 @@ DATA.forEach(col => {
 
 const svg = document.getElementById("connectors");
 const board = document.getElementById("board");
+const MOBILE_MQ = window.matchMedia("(max-width: 720px)");
+const HOVER_OK = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
 function drawConnectors(){
   svg.innerHTML = "";
@@ -338,7 +383,7 @@ function drawConnectors(){
   svg.setAttribute("height", totalH);
   svg.setAttribute("viewBox", `0 0 ${totalW} ${totalH}`);
 
-  EDGES.forEach(([fromId, toId, cat], i) => {
+  EDGES.forEach(([fromId, toId, cat]) => {
     const fromEl = document.getElementById(fromId);
     const toEl = document.getElementById(toId);
     if(!fromEl || !toEl) return;
@@ -369,35 +414,115 @@ function drawConnectors(){
   });
 }
 
-function wireHover(){
-  document.querySelectorAll(".card").forEach(card => {
-    card.addEventListener("mouseenter", () => {
-      const id = card.dataset.id;
-      const related = new Set([id]);
-      EDGES.forEach(([f,t]) => { if(f===id) related.add(t); if(t===id) related.add(f); });
+let pinnedId = null;
 
-      document.querySelectorAll(".card").forEach(c => {
-        c.classList.toggle("dim", !related.has(c.dataset.id));
-        c.classList.toggle("hi", c.dataset.id === id);
-      });
-      svg.querySelectorAll("path,circle").forEach(el => {
-        const hit = el.dataset.from === id || el.dataset.to === id;
-        el.classList.toggle("hi", hit);
-        el.classList.toggle("dim", !hit);
-      });
-    });
-    card.addEventListener("mouseleave", () => {
-      document.querySelectorAll(".card").forEach(c => { c.classList.remove("dim","hi"); });
-      svg.querySelectorAll("path,circle").forEach(el => { el.classList.remove("dim","hi"); });
-    });
+function highlight(id){
+  const related = id ? new Set([id]) : null;
+  if(id) EDGES.forEach(([f,t]) => { if(f===id) related.add(t); if(t===id) related.add(f); });
+
+  board.querySelectorAll(".card").forEach(c => {
+    c.classList.toggle("dim", !!id && !related.has(c.dataset.id));
+    c.classList.toggle("hi", c.dataset.id === id);
+  });
+  svg.querySelectorAll("path,circle").forEach(el => {
+    const hit = !!id && (el.dataset.from === id || el.dataset.to === id);
+    el.classList.toggle("hi", hit);
+    el.classList.toggle("dim", !!id && !hit);
   });
 }
 
-requestAnimationFrame(() => {
-  drawConnectors();
-  wireHover();
+function wireInteraction(){
+  board.querySelectorAll(".card").forEach(card => {
+    if(HOVER_OK){
+      card.addEventListener("mouseenter", () => { if(!pinnedId) highlight(card.dataset.id); });
+      card.addEventListener("mouseleave", () => { if(!pinnedId) highlight(null); });
+    }
+    card.addEventListener("click", (e) => {
+      e.stopPropagation();
+      pinnedId = (pinnedId === card.dataset.id) ? null : card.dataset.id;
+      highlight(pinnedId);
+    });
+  });
+  board.addEventListener("click", () => { pinnedId = null; highlight(null); });
+}
+
+// --- mobile select view: pick a félév, see its subjects + their prerequisites ---
+const subjectsById = {};
+DATA.forEach((col, ci) => {
+  col.subjects.forEach(s => { subjectsById[s.id] = {...s, felevIndex: ci, felevLabel: col.label}; });
 });
-window.addEventListener("resize", () => requestAnimationFrame(drawConnectors));
+const prereqMap = {};
+EDGES.forEach(([f, t]) => { prereqMap[t] = subjectsById[f]; });
+
+function mcardHTML(s, opts = {}){
+  const prereq = !opts.dim ? prereqMap[s.id] : null;
+  const prereqLine = prereq
+    ? `<div class="prereq-line" data-jump="${prereq.felevIndex}">Előfeltétel: ${prereq.n} <span class="pl-sub">(${prereq.felevLabel})</span></div>`
+    : "";
+  const jumpAttr = opts.dim ? ` data-jump="${s.felevIndex}"` : "";
+  return `
+    <div class="card mcard ev-${s.ev}${s.elective ? " elective" : ""}${opts.dim ? " prereq-card" : ""}"${jumpAttr}>
+      ${opts.tag ? `<span class="prereq-tag">${opts.tag}</span>` : ""}
+      <div class="card-title">${s.n}</div>
+      <div class="card-meta">
+        <span class="badge badge-${s.ev}">${s.ev}</span>
+        <span class="kr">${s.kr} kr</span>
+        <span>EA ${s.ea} · GY ${s.gy}</span>
+      </div>
+      ${s.note ? `<div class="card-note">${s.note}</div>` : ""}
+      ${prereqLine}
+    </div>`;
+}
+
+const felevSelect = document.getElementById("felevSelect");
+const mvSummary = document.getElementById("mvSummary");
+const mvCards = document.getElementById("mvCards");
+const mvPrereqs = document.getElementById("mvPrereqs");
+const mobileView = document.getElementById("mobileView");
+
+felevSelect.innerHTML = DATA.map((c, i) => `<option value="${i}">${c.label}</option>`).join("");
+
+function renderMobile(felevIndex){
+  const col = DATA[felevIndex];
+  const enriched = col.subjects.map(s => subjectsById[s.id]);
+
+  felevSelect.value = felevIndex;
+  mvSummary.textContent = col.sum;
+  mvCards.innerHTML = enriched.map(s => mcardHTML(s)).join("");
+
+  const seen = new Map();
+  enriched.forEach(s => { const p = prereqMap[s.id]; if(p && !seen.has(p.id)) seen.set(p.id, p); });
+  mvPrereqs.innerHTML = seen.size
+    ? `<div class="mv-section-title">Előzmény tárgyak ehhez a félévhez</div>` +
+      [...seen.values()].map(p => mcardHTML(p, {dim: true, tag: `előzmény · ${p.felevLabel}`})).join("")
+    : "";
+
+  mobileView.querySelectorAll("[data-jump]").forEach(el => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      renderMobile(parseInt(el.dataset.jump, 10));
+      mobileView.scrollIntoView({behavior: "smooth", block: "start"});
+    });
+  });
+}
+felevSelect.addEventListener("change", () => renderMobile(parseInt(felevSelect.value, 10)));
+renderMobile(0);
+
+// --- init / responsive redraw ---
+function refreshDesktop(){
+  if(!MOBILE_MQ.matches) drawConnectors();
+}
+requestAnimationFrame(() => {
+  refreshDesktop();
+  wireInteraction();
+});
+let resizeT;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(refreshDesktop, 120);
+});
+if(MOBILE_MQ.addEventListener) MOBILE_MQ.addEventListener("change", refreshDesktop);
+else if(MOBILE_MQ.addListener) MOBILE_MQ.addListener(refreshDesktop);
 </script>
 </body>
 </html>
