@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Kereskedelem és marketing – mintatanterv folyamatábra</title>
+<style>
+  :root{
+    --bg:#f4f5f8;
+    --paper:#ffffff;
+    --ink:#1c2333;
+    --sub:#6b7383;
+    --line:#e3e6ee;
+    --v-bg:#dbeafe; --v-fg:#1d4ed8;
+    --gyj-bg:#d1fae5; --gyj-fg:#047857;
+    --ai-bg:#e5e9f0; --ai-fg:#4a5468;
+    --c-stat:#2563eb;
+    --c-penz:#059669;
+    --c-jog:#d97706;
+    --c-market:#db2777;
+    --c-komm:#7c3aed;
+    --c-mgmt:#64748b;
+    --c-capstone:#0f172a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:"Segoe UI", ui-sans-serif, system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    color:var(--ink);
+  }
+  .page{
+    max-width:1900px;
+    margin:0 auto;
+    padding:28px 28px 56px;
+  }
+  header{
+    margin-bottom:22px;
+  }
+  header h1{
+    font-size:22px;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    margin:0;
+    color:var(--sub);
+    font-size:13.5px;
+  }
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    margin:16px 0 28px;
+    padding:12px 16px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-size:12.5px;
+    color:var(--sub);
+    align-items:center;
+  }
+  .legend b{color:var(--ink); font-weight:600; margin-right:2px;}
+  .legend .grp{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .legend .swatch{display:inline-flex; align-items:center; gap:5px; white-space:nowrap;}
+  .legend .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+  .legend .ln{width:20px; height:0; border-top:2.5px solid; display:inline-block;}
+  .badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:700; border-radius:5px; padding:1px 5px;
+    text-transform:lowercase;
+  }
+  .badge-v{background:var(--v-bg); color:var(--v-fg);}
+  .badge-gyj{background:var(--gyj-bg); color:var(--gyj-fg);}
+  .badge-ai{background:var(--ai-bg); color:var(--ai-fg);}
+
+  .board{position:relative; overflow-x:auto; padding-bottom:8px;}
+  .columns{
+    display:flex;
+    gap:34px;
+    position:relative;
+    z-index:1;
+    width:max-content;
+  }
+  .column{
+    width:196px;
+    display:flex;
+    flex-direction:column;
+  }
+  .col-head{
+    text-align:center;
+    margin-bottom:12px;
+  }
+  .col-head .n{
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .col-head .sum{
+    font-size:11px;
+    color:var(--sub);
+    margin-top:2px;
+  }
+  .cards{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-left:4px solid var(--ai-fg);
+    border-radius:9px;
+    padding:9px 10px 8px;
+    box-shadow:0 1px 2px rgba(20,25,40,0.04);
+    transition:box-shadow .18s ease, transform .18s ease, opacity .18s ease;
+  }
+  .card.ev-v{border-left-color:var(--v-fg);}
+  .card.ev-gyj{border-left-color:var(--gyj-fg);}
+  .card.ev-ai{border-left-color:var(--ai-fg);}
+  .card.elective{
+    border-style:dashed;
+    background:#fbfbfc;
+  }
+  .card.elective .card-title{font-style:italic; color:var(--sub); font-weight:500;}
+  .card-title{
+    font-size:12.3px;
+    font-weight:600;
+    line-height:1.28;
+    margin-bottom:6px;
+    min-height:2.5em;
+  }
+  .card-meta{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+    font-size:10.5px;
+    color:var(--sub);
+  }
+  .card-meta .kr{font-weight:600; color:var(--ink);}
+  .card-note{
+    margin-top:5px;
+    font-size:10px;
+    color:#9a6b00;
+    background:#fff6e0;
+    border-radius:5px;
+    padding:2px 5px;
+    display:inline-block;
+  }
+  .card.dim{opacity:0.28;}
+  .card.hi{box-shadow:0 3px 10px rgba(20,25,40,0.14); transform:translateY(-1px);}
+
+  svg.connectors{position:absolute; top:0; left:0; pointer-events:none; overflow:visible;}
+  svg.connectors path{
+    fill:none;
+    stroke-width:2;
+    opacity:0.5;
+    transition:opacity .18s ease, stroke-width .18s ease;
+  }
+  svg.connectors path.dim{opacity:0.06;}
+  svg.connectors path.hi{opacity:0.95; stroke-width:3;}
+  svg.connectors circle{transition:opacity .18s ease;}
+  svg.connectors circle.dim{opacity:0.1;}
+
+  footer{
+    margin-top:22px;
+    font-size:11px;
+    color:var(--sub);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Kereskedelem és marketing – alapképzési szak, nappali tagozat</h1>
+    <p>Mintatanterv, érvényes 2024. szeptember 1-től · Neumann János Egyetem, Gazdaságtudományi Kar</p>
+  </header>
+
+  <div class="legend">
+    <div class="grp"><b>Értékelés:</b>
+      <span class="swatch"><span class="badge badge-v">v</span> vizsga</span>
+      <span class="swatch"><span class="badge badge-gyj">gyj</span> gyak. jegy</span>
+      <span class="swatch"><span class="badge badge-ai">ai</span> aláírás</span>
+    </div>
+    <div class="grp"><b>Előfeltétel-láncok:</b>
+      <span class="swatch"><span class="ln" style="border-color:#2563eb"></span> matematika / statisztika</span>
+      <span class="swatch"><span class="ln" style="border-color:#059669"></span> pénzügy / számvitel</span>
+      <span class="swatch"><span class="ln" style="border-color:#d97706"></span> jog</span>
+      <span class="swatch"><span class="ln" style="border-color:#db2777"></span> marketing alapismeretek</span>
+      <span class="swatch"><span class="ln" style="border-color:#7c3aed"></span> kommunikáció</span>
+      <span class="swatch"><span class="ln" style="border-color:#64748b"></span> menedzsment</span>
+      <span class="swatch"><span class="ln" style="border-color:#0f172a"></span> záró blokk (portfólió/szakdolgozat/gyakorlat)</span>
+    </div>
+  </div>
+
+  <div class="board" id="board">
+    <svg class="connectors" id="connectors"></svg>
+    <div class="columns" id="columns"></div>
+  </div>
+
+  <footer>Kártya fölé húzva kiemelődnek a kapcsolódó előfeltétel-vonalak és tárgyak. A halványsárga jelzés kreditkövetelményt jelöl, nem konkrét tárgyi előfeltételt.</footer>
+</div>
+
+<script>
+const DATA = [
+  { label:"1. félév", sum:"30 kredit · EA 10/hét · GY 14/hét", subjects:[
+    {id:"f1-mat1", n:"Gazdasági matematika 1.", ev:"v", kr:5, ea:2, gy:2},
+    {id:"f1-kozgaz1", n:"Közgazdaságtan 1.", ev:"v", kr:5, ea:1, gy:2},
+    {id:"f1-menedzs1", n:"Menedzsment alapismeretek 1.", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f1-vallgazd", n:"Vállalatgazdaságtan", ev:"v", kr:5, ea:1, gy:2},
+    {id:"f1-gazdinfo", n:"Gazdaságinformatika", ev:"gyj", kr:2, ea:1, gy:1},
+    {id:"f1-kompport1", n:"Kompetencia-Portfólió 1.", ev:"ai", kr:0, ea:0, gy:2},
+    {id:"f1-jog", n:"Általános és gazdasági jog", ev:"v", kr:5, ea:2, gy:0},
+    {id:"f1-penzugytan", n:"Pénzügytan", ev:"v", kr:3, ea:2, gy:0},
+    {id:"f1-testnev1", n:"Testnevelés 1.", ev:"ai", kr:0, ea:0, gy:2},
+    {id:"f1-szab1", n:"Szabadon választható tárgy", ev:"gyj", kr:2, ea:0, gy:2, elective:true},
+  ]},
+  { label:"2. félév", sum:"30 kredit · EA 9/hét · GY 13/hét", subjects:[
+    {id:"f2-mat2", n:"Gazdasági matematika 2.", ev:"v", kr:5, ea:2, gy:2},
+    {id:"f2-kozgaz2", n:"Közgazdaságtan 2.", ev:"v", kr:5, ea:2, gy:1},
+    {id:"f2-menedzs2", n:"Menedzsment alapismeretek 2.", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f2-szamvitel", n:"Számvitel alapjai", ev:"v", kr:5, ea:1, gy:2},
+    {id:"f2-market", n:"Marketing alapismeretek", ev:"v", kr:5, ea:2, gy:1},
+    {id:"f2-stat1", n:"Statisztika 1.", ev:"gyj", kr:4, ea:1, gy:2},
+    {id:"f2-szaknyelv1", n:"Szaknyelv 1.", ev:"gyj", kr:3, ea:0, gy:2},
+    {id:"f2-testnev2", n:"Testnevelés 2.", ev:"ai", kr:0, ea:0, gy:2},
+  ]},
+  { label:"3. félév", sum:"30 kredit · EA 8/hét · GY 11/hét", subjects:[
+    {id:"f3-uk1", n:"Üzleti kommunikáció 1.", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f3-tarsvis", n:"Társas viselkedés", ev:"v", kr:3, ea:2, gy:0},
+    {id:"f3-stat2", n:"Statisztika 2.", ev:"v", kr:6, ea:1, gy:2},
+    {id:"f3-vp1", n:"Vállalati pénzügyek 1.", ev:"gyj", kr:5, ea:1, gy:2},
+    {id:"f3-penzszamv", n:"Pénzügyi számvitel és számviteli elemzés", ev:"gyj", kr:5, ea:1, gy:2},
+    {id:"f3-gazdtort", n:"Gazdaságtörténet", ev:"v", kr:3, ea:2, gy:0},
+    {id:"f3-szaknyelv2", n:"Szaknyelv 2.", ev:"gyj", kr:3, ea:0, gy:2},
+    {id:"f3-szab2", n:"Szabadon választható tárgy", ev:"gyj", kr:2, ea:0, gy:2, elective:true},
+  ]},
+  { label:"4. félév", sum:"30 kredit · EA 9/hét · GY 10/hét", subjects:[
+    {id:"f4-uk2", n:"Üzleti kommunikáció 2.", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f4-vp2", n:"Vállalati pénzügyek 2.", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f4-uzletijog", n:"Üzleti jog", ev:"v", kr:5, ea:2, gy:1},
+    {id:"f4-mmenedzs", n:"Marketingmenedzsment", ev:"v", kr:5, ea:1, gy:2},
+    {id:"f4-ertekterem", n:"Értékteremtő folyamatok menedzsmentje", ev:"v", kr:5, ea:2, gy:1},
+    {id:"f4-vezszerv", n:"Vezetési és szervezési ismeretek", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f4-fogymag", n:"Fogyasztói magatartás", ev:"v", kr:4, ea:1, gy:1},
+    {id:"f4-szab3", n:"Szabadon választható tárgy", ev:"gyj", kr:2, ea:0, gy:2, elective:true},
+  ]},
+  { label:"5. félév", sum:"30 kredit · EA 12/hét · GY 10/hét", subjects:[
+    {id:"f5-projekt", n:"Projektfeladat", ev:"gyj", kr:2, ea:0, gy:3, note:"min. 95 kredit"},
+    {id:"f5-eu", n:"Európai Uniós ismeretek", ev:"v", kr:2, ea:2, gy:0},
+    {id:"f5-stratterv", n:"Stratégiai tervezés", ev:"gyj", kr:5, ea:1, gy:2},
+    {id:"f5-nemzint", n:"Nemzetközi kereskedelemi és gazdasági intézmények", ev:"v", kr:5, ea:2, gy:1},
+    {id:"f5-mkut", n:"Marketingkutatás", ev:"gyj", kr:2, ea:1, gy:1},
+    {id:"f5-mkomm", n:"Marketingkommunikáció", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f5-filoz", n:"Filozófia", ev:"v", kr:3, ea:2, gy:0},
+    {id:"f5-keresk", n:"Kereskedelemgazdaságtan és kereskedelmi marketing", ev:"v", kr:5, ea:2, gy:1},
+    {id:"f5-online", n:"Online marketing és közösségi média", ev:"gyj", kr:3, ea:1, gy:1},
+  ]},
+  { label:"6. félév", sum:"30 kredit · EA 8/hét · GY 16/hét", subjects:[
+    {id:"f6-ember", n:"Emberierőforrás-gazdálkodás", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f6-korny", n:"Környezetgazdaságtan", ev:"v", kr:3, ea:1, gy:1},
+    {id:"f6-szd1", n:"Szakdolgozat-készítés 1.", ev:"gyj", kr:5, ea:0, gy:6},
+    {id:"f6-mkut2", n:"Marketingkutatás 2.", ev:"gyj", kr:5, ea:2, gy:1},
+    {id:"f6-csr", n:"Társadalmi felelősségvállalás (CSR) és Közönségkapcsolatok (PR)", ev:"gyj", kr:4, ea:2, gy:0},
+    {id:"f6-mediagazd", n:"Médiagazdaságtan", ev:"v", kr:3, ea:1, gy:2},
+    {id:"f6-ergo", n:"Ergonómia és design", ev:"gyj", kr:3, ea:1, gy:1},
+    {id:"f6-szab4", n:"Szabadon választható tárgy", ev:"gyj", kr:2, ea:0, gy:2, elective:true},
+    {id:"f6-szab5", n:"Szabadon választható tárgy", ev:"gyj", kr:2, ea:0, gy:2, elective:true},
+  ]},
+  { label:"7. félév", sum:"30 kredit · EA 0/hét · GY 48/hét", subjects:[
+    {id:"f7-kp2", n:"Kompetencia-Portfólió 2.", ev:"ai", kr:0, ea:0, gy:2, note:"+150 kredit"},
+    {id:"f7-szd2", n:"Szakdolgozat-készítés 2.", ev:"ai", kr:5, ea:0, gy:6},
+    {id:"f7-szakgyak", n:"Szakmai gyakorlat (13 hét)", ev:"ai", kr:25, ea:0, gy:40, note:"min. 120 kredit"},
+  ]},
+];
+
+const EDGES = [
+  ["f1-menedzs1","f2-menedzs2","mgmt"],
+  ["f1-mat1","f2-stat1","stat"],
+  ["f2-stat1","f3-stat2","stat"],
+  ["f1-penzugytan","f3-vp1","penz"],
+  ["f2-szamvitel","f3-penzszamv","penz"],
+  ["f3-uk1","f4-uk2","komm"],
+  ["f3-vp1","f4-vp2","penz"],
+  ["f1-jog","f4-uzletijog","jog"],
+  ["f2-market","f4-mmenedzs","market"],
+  ["f2-market","f4-fogymag","market"],
+  ["f2-market","f5-mkut","market"],
+  ["f4-uk2","f5-mkomm","komm"],
+  ["f2-market","f5-keresk","market"],
+  ["f2-market","f5-online","market"],
+  ["f5-projekt","f6-szd1","capstone"],
+  ["f5-mkut","f6-mkut2","market"],
+  ["f3-uk1","f6-csr","komm"],
+  ["f2-market","f6-mediagazd","market"],
+  ["f2-market","f6-ergo","market"],
+  ["f1-kompport1","f7-kp2","capstone"],
+  ["f6-szd1","f7-szd2","capstone"],
+];
+
+const CAT_COLOR = {
+  stat:"#2563eb", penz:"#059669", jog:"#d97706",
+  market:"#db2777", komm:"#7c3aed", mgmt:"#64748b", capstone:"#0f172a"
+};
+
+const columnsEl = document.getElementById("columns");
+DATA.forEach(col => {
+  const colEl = document.createElement("div");
+  colEl.className = "column";
+  const cardsHtml = col.subjects.map(s => `
+    <div class="card ev-${s.ev}${s.elective ? " elective" : ""}" id="${s.id}" data-id="${s.id}">
+      <div class="card-title">${s.n}</div>
+      <div class="card-meta">
+        <span class="badge badge-${s.ev}">${s.ev}</span>
+        <span class="kr">${s.kr} kr</span>
+        <span>EA ${s.ea} · GY ${s.gy}</span>
+      </div>
+      ${s.note ? `<div class="card-note">${s.note}</div>` : ""}
+    </div>`).join("");
+  colEl.innerHTML = `
+    <div class="col-head">
+      <div class="n">${col.label}</div>
+      <div class="sum">${col.sum}</div>
+    </div>
+    <div class="cards">${cardsHtml}</div>`;
+  columnsEl.appendChild(colEl);
+});
+
+const svg = document.getElementById("connectors");
+const board = document.getElementById("board");
+
+function drawConnectors(){
+  svg.innerHTML = "";
+  const boardRect = board.getBoundingClientRect();
+  const totalW = columnsEl.scrollWidth;
+  const totalH = columnsEl.scrollHeight;
+  svg.setAttribute("width", totalW);
+  svg.setAttribute("height", totalH);
+  svg.setAttribute("viewBox", `0 0 ${totalW} ${totalH}`);
+
+  EDGES.forEach(([fromId, toId, cat], i) => {
+    const fromEl = document.getElementById(fromId);
+    const toEl = document.getElementById(toId);
+    if(!fromEl || !toEl) return;
+    const fr = fromEl.getBoundingClientRect();
+    const tr = toEl.getBoundingClientRect();
+    const x1 = fr.right - boardRect.left + board.scrollLeft;
+    const y1 = fr.top + fr.height/2 - boardRect.top + board.scrollTop;
+    const x2 = tr.left - boardRect.left + board.scrollLeft;
+    const y2 = tr.top + tr.height/2 - boardRect.top + board.scrollTop;
+    const dx = Math.max(30, (x2 - x1) * 0.45);
+    const d = `M ${x1},${y1} C ${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
+    const color = CAT_COLOR[cat] || "#999";
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d", d);
+    path.setAttribute("stroke", color);
+    path.dataset.from = fromId;
+    path.dataset.to = toId;
+    svg.appendChild(path);
+
+    [[x1,y1],[x2,y2]].forEach(([cx,cy])=>{
+      const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", 2.6);
+      c.setAttribute("fill", color);
+      c.dataset.from = fromId; c.dataset.to = toId;
+      svg.appendChild(c);
+    });
+  });
+}
+
+function wireHover(){
+  document.querySelectorAll(".card").forEach(card => {
+    card.addEventListener("mouseenter", () => {
+      const id = card.dataset.id;
+      const related = new Set([id]);
+      EDGES.forEach(([f,t]) => { if(f===id) related.add(t); if(t===id) related.add(f); });
+
+      document.querySelectorAll(".card").forEach(c => {
+        c.classList.toggle("dim", !related.has(c.dataset.id));
+        c.classList.toggle("hi", c.dataset.id === id);
+      });
+      svg.querySelectorAll("path,circle").forEach(el => {
+        const hit = el.dataset.from === id || el.dataset.to === id;
+        el.classList.toggle("hi", hit);
+        el.classList.toggle("dim", !hit);
+      });
+    });
+    card.addEventListener("mouseleave", () => {
+      document.querySelectorAll(".card").forEach(c => { c.classList.remove("dim","hi"); });
+      svg.querySelectorAll("path,circle").forEach(el => { el.classList.remove("dim","hi"); });
+    });
+  });
+}
+
+requestAnimationFrame(() => {
+  drawConnectors();
+  wireHover();
+});
+window.addEventListener("resize", () => requestAnimationFrame(drawConnectors));
+</script>
+</body>
+</html>
